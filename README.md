@@ -1,4 +1,4 @@
-# LID Dialog System
+# Language Detection Dialog System
 
 Simple system for language identification (LID) in multilingual dialogue.
 
@@ -10,15 +10,15 @@ The project detects the language of user input, handles basic dialog responses, 
 
 - Language detection (text)
 - Simple dialog response based on detected language
-- Code-switching detection (between utterances)
+- (Planned) Code-switching detection (between utterances)
 - List of supported languages
 - Basic system health check
-- (Planned) voice input support
+- (Planned) Voice input support
 - (Planned) UI for interaction
 
 ---
 
-## Tech Stack
+## Tech used
 
 - Python 3
 - FastAPI
@@ -35,6 +35,8 @@ uvicorn app.main:app --reload
 
 Open in browser 
 [API docs](http://127.0.0.1:8000/docs)
+
+---
 
 ## API Endpoints
 - GET /health
