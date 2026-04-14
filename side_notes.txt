@@ -1,0 +1,16 @@
+curl -X POST "http://127.0.0.1:8000/detect-language/text" \
+-H "Content-Type: application/json" \
+-d '{"text": "Hallo, wie geht es dir?"}'
+
+
+curl -X POST "http://127.0.0.1:8000/dialog/respond" \      
+-H "Content-Type: application/json" \
+-d '{"text": "Hallo, wie geht es dir?"}'
+
+
+curl -X 'GET' \
+  'http://127.0.0.1:8000/supported-languages'
+
+
+  curl -X 'GET' \
+  'http://127.0.0.1:8000/health'
