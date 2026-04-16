@@ -1,4 +1,4 @@
-from langdetect import detect, DetectorFactory
+from langdetect import detect_langs, DetectorFactory
 
 DetectorFactory.seed = 0
 
@@ -18,10 +18,20 @@ LANGUAGE_MAP = {
 
 def detect_language(text):
     try:
-        language_code = detect(text)
+        langs = detect_langs(text)
+        best = langs[0]
+
+        language_code = best.lang
+        confidence = best.prob
+
         language_name = LANGUAGE_MAP.get(language_code, f"Unknown ({language_code})")
 
-        return {"language": language_code, "language_name": language_name}
+        return {
+            "language": language_code,
+            "language_name": language_name,
+            "confidence": round(confidence, 3),
+        }
+
     except Exception as e:
         return {"error": f"Language detection failed: {str(e)}"}
 
@@ -43,6 +53,7 @@ def detect_code_switching(utterances):
                     "text": utterance,
                     "language": result["language"],
                     "language_name": result["language_name"],
+                    "confidence": result.get("confidence"),
                 }
             )
 

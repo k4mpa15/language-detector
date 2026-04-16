@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request, UploadFile, File
 from app.service import LANGUAGE_MAP, detect_language, detect_code_switching
-from app.asr_service import transcribe_audio_with_segments 
+from app.asr_service import transcribe_audio_with_segments
 import os
 import tempfile
 
@@ -101,13 +101,16 @@ async def detect_language_voice(file: UploadFile = File(...)):
                 lang = lid["language"]
                 lang_name = lid["language_name"]
 
-            sequence.append({
-                "start": seg["start"],
-                "end": seg["end"],
-                "text": text,
-                "language": lang,
-                "language_name": lang_name
-            })
+            sequence.append(
+                {
+                    "start": seg["start"],
+                    "end": seg["end"],
+                    "text": text,
+                    "language": lang,
+                    "language_name": lang_name,
+                    "confidence": lid.get("confidence"),
+                }
+            )
 
         # detect switching
         for i in range(1, len(sequence)):
@@ -115,18 +118,22 @@ async def detect_language_voice(file: UploadFile = File(...)):
                 switch_points.append(i)
 
         full_text = " ".join([s["text"] for s in sequence])
+        lid_full = detect_language(full_text)
 
         return {
             "transcription": full_text,
+            "language": lid_full.get("language"),
+            "language_name": lid_full.get("language_name"),
+            "confidence": lid_full.get("confidence"),
             "code_switch_detected": len(switch_points) > 0,
             "switch_points": switch_points,
-            "sequence": sequence
+            "sequence": sequence,
         }
 
     except Exception as e:
         return {"error": str(e)}
-    
-    
+
+
 @app.post("/dialog/respond")
 async def dialog_respond(request: Request):
     try:
@@ -147,7 +154,9 @@ async def dialog_respond(request: Request):
         if language == "pl":
             response_text = "Wykryłam język polski. Mogę kontynuować rozmowę po polsku."
         elif language == "en":
-            response_text = "I detected English. I can continue the conversation in English."
+            response_text = (
+                "I detected English. I can continue the conversation in English."
+            )
         elif language == "de":
             response_text = "Ich habe Deutsch erkannt. Ich kann das Gespräch auf Deutsch fortsetzen."
         else:
