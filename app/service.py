@@ -21,10 +21,7 @@ def detect_language(text):
         language_code = detect(text)
         language_name = LANGUAGE_MAP.get(language_code, f"Unknown ({language_code})")
 
-        return {
-            "language": language_code,
-            "language_name": language_name
-        }
+        return {"language": language_code, "language_name": language_name}
     except Exception as e:
         return {"error": f"Language detection failed: {str(e)}"}
 
@@ -37,17 +34,17 @@ def detect_code_switching(utterances):
         result = detect_language(utterance)
 
         if "error" in result:
-            sequence.append({
-                "text": utterance,
-                "language": "unknown",
-                "language_name": "Unknown"
-            })
+            sequence.append(
+                {"text": utterance, "language": "unknown", "language_name": "Unknown"}
+            )
         else:
-            sequence.append({
-                "text": utterance,
-                "language": result["language"],
-                "language_name": result["language_name"]
-            })
+            sequence.append(
+                {
+                    "text": utterance,
+                    "language": result["language"],
+                    "language_name": result["language_name"],
+                }
+            )
 
     for i in range(1, len(sequence)):
         if sequence[i]["language"] != sequence[i - 1]["language"]:
@@ -56,5 +53,5 @@ def detect_code_switching(utterances):
     return {
         "code_switch_detected": len(switch_points) > 0,
         "switch_points": switch_points,
-        "sequence": sequence
+        "sequence": sequence,
     }

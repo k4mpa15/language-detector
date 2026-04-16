@@ -25,16 +25,14 @@ print_response("GET /supported-languages", response)
 
 # 3. POST /detect-language/text
 response = requests.post(
-    f"{BASE_URL}/detect-language/text",
-    json={"text": "Hello world"}
+    f"{BASE_URL}/detect-language/text", json={"text": "Hello world"}
 )
 print_response("POST /detect-language/text", response)
 
 
 # 4. POST /dialog/respond
 response = requests.post(
-    f"{BASE_URL}/dialog/respond",
-    json={"text": "Cześć, jak się masz?"}
+    f"{BASE_URL}/dialog/respond", json={"text": "Cześć, jak się masz?"}
 )
 print_response("POST /dialog/respond", response)
 
@@ -46,9 +44,12 @@ response = requests.post(
         "utterances": [
             "Cześć, jak się masz?",
             "I am fine, thank you.",
-            "Super, to dobrze."
+            "Super, to dobrze.",
         ]
-    }
+    },
 )
 print_response("POST /detect-code-switching", response)
 
+# 6. POST /detect-language/voice
+response = requests.post(f"{BASE_URL}/detect-language/voice")
+print_response("POST /detect-language/voice", response)

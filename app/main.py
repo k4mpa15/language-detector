@@ -46,7 +46,9 @@ async def detect_code_switching_endpoint(request: Request):
         if not isinstance(utterances, list):
             return {"error": "Pole 'utterances' musi być listą"}
 
-        cleaned_utterances = [u.strip() for u in utterances if isinstance(u, str) and u.strip()]
+        cleaned_utterances = [
+            u.strip() for u in utterances if isinstance(u, str) and u.strip()
+        ]
 
         if not cleaned_utterances:
             return {"error": "Lista 'utterances' nie może być pusta"}
@@ -90,10 +92,10 @@ async def dialog_respond(request: Request):
         else:
             response_text = f"Detected language: {language_name}. Full dialog support is currently focused on Polish, English and German."
         return {
-        "detected_language": language,
-        "language_name": language_name,
-        "response_text": response_text
-}
+            "detected_language": language,
+            "language_name": language_name,
+            "response_text": response_text,
+        }
 
     except Exception as e:
         return {"error": str(e)}
