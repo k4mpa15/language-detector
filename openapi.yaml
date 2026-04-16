@@ -1,0 +1,177 @@
+openapi: 3.1.0
+info:
+  title: LID Dialog System API
+  version: 1.0.0
+  description: API for language identification and dialog system
+
+paths:
+  /health:
+    get:
+      summary: Check system status
+      responses:
+        '200':
+          description: System is running
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /supported-languages:
+    get:
+      summary: Get supported languages
+      responses:
+        '200':
+          description: List of supported languages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  supported_languages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          example: en
+                        name:
+                          type: string
+                          example: English
+
+  /detect-language/text:
+    post:
+      summary: Detect language from text
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  example: Hello world
+      responses:
+        '200':
+          description: Detected language
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  language:
+                    type: string
+                    example: en
+                  language_name:
+                    type: string
+                    example: English
+                  confidence:
+                    type: number
+                    example: 0.99
+
+  /detect-language/voice:
+    post:
+      summary: Detect language from audio
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Detected language from audio
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transcription:
+                    type: string
+                  language:
+                    type: string
+                  language_name:
+                    type: string
+                  confidence:
+                    type: number
+
+  /dialog/respond:
+    post:
+      summary: Generate dialog response
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  example: Cześć
+      responses:
+        '200':
+          description: Dialog response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detected_language:
+                    type: string
+                  language_name:
+                    type: string
+                  response_text:
+                    type: string
+
+  /detect-code-switching:
+    post:
+      summary: Detect code-switching in utterances
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                utterances:
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - Cześć
+                    - Hello
+                    - Jak się masz
+      responses:
+        '200':
+          description: Code-switching result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code_switch_detected:
+                    type: boolean
+                  switch_points:
+                    type: array
+                    items:
+                      type: integer
+                  sequence:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        text:
+                          type: string
+                        language:
+                          type: string
+                        language_name:
+                          type: string

@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request
-from app.service import LANGUAGE_MAP, detect_language
+from app.service import LANGUAGE_MAP, detect_language, detect_code_switching
 
 app = FastAPI()
 
@@ -34,7 +34,27 @@ async def detect_language_text(request: Request):
         return {"error": str(e)}
 
 
-# @app.post("/detect-code-switching")
+@app.post("/detect-code-switching")
+async def detect_code_switching_endpoint(request: Request):
+    try:
+        data = await request.json()
+        utterances = data.get("utterances", [])
+
+        if not utterances:
+            return {"error": "Pole 'utterances' jest wymagane"}
+
+        if not isinstance(utterances, list):
+            return {"error": "Pole 'utterances' musi być listą"}
+
+        cleaned_utterances = [u.strip() for u in utterances if isinstance(u, str) and u.strip()]
+
+        if not cleaned_utterances:
+            return {"error": "Lista 'utterances' nie może być pusta"}
+
+        return detect_code_switching(cleaned_utterances)
+
+    except Exception as e:
+        return {"error": str(e)}
 
 
 @app.post("/detect-language/voice")
@@ -68,9 +88,12 @@ async def dialog_respond(request: Request):
         elif language == "de":
             response_text = "Ich habe Deutsch erkannt. Ich kann das Gespräch auf Deutsch fortsetzen."
         else:
-            response_text = f"Wykryty język: {language_name}. Na razie mam przygotowaną pełną obsługę głównie dla PL, EN i DE."
-
-        return {"detected_language": language, "response_text": response_text}
+            response_text = f"Detected language: {language_name}. Full dialog support is currently focused on Polish, English and German."
+        return {
+        "detected_language": language,
+        "language_name": language_name,
+        "response_text": response_text
+}
 
     except Exception as e:
         return {"error": str(e)}
