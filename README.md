@@ -10,10 +10,10 @@ The project detects the language of user input, handles basic dialog responses, 
 
 - Language detection (text)
 - Simple dialog response based on detected language
-- (Planned) Code-switching detection (between utterances)
+- Code-switching detection (between utterances)
 - List of supported languages
 - Basic system health check
-- (Planned) Voice input support
+- Voice input support
 - (Planned) UI for interaction
 
 ---
