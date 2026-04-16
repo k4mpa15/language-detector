@@ -51,7 +51,7 @@ response = requests.post(
 print_response("POST /detect-code-switching", response)
 
 # 6. POST /detect-language/voice
-with open("tests/sample_en.m4a", "rb") as f:
+with open("tests/sample_pl_en.m4a", "rb") as f:
     response = requests.post(
         f"{BASE_URL}/detect-language/voice",
         files={"file": f}

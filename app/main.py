@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request, UploadFile, File
 from app.service import LANGUAGE_MAP, detect_language, detect_code_switching
-from app.asr_service import transcribe_audio
+from app.asr_service import transcribe_audio_with_segments 
 import os
 import tempfile
 
@@ -68,40 +68,65 @@ async def detect_language_voice(file: UploadFile = File(...)):
         if not file.filename:
             return {"error": "No file provided"}
 
-        # zapis do pliku tymczasowego
         suffix = os.path.splitext(file.filename)[1]
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
             tmp.write(await file.read())
             temp_path = tmp.name
 
-        # ASR
-        asr_result = transcribe_audio(temp_path)
-
-        # usuwanie pliku
+        # ASR z segmentami
+        asr_result = transcribe_audio_with_segments(temp_path)
         os.remove(temp_path)
 
-        transcription = asr_result["transcription"]
+        segments = asr_result["segments"]
 
-        if not transcription:
-            return {"error": "Could not transcribe audio"}
+        if not segments:
+            return {"error": "No speech detected"}
 
-        # LID na transkrypcji
-        lid_result = detect_language(transcription)
+        sequence = []
+        switch_points = []
 
-        if "error" in lid_result:
-            return lid_result
+        for seg in segments:
+            text = seg["text"]
+
+            if not text:
+                continue
+
+            lid = detect_language(text)
+
+            if "error" in lid:
+                lang = "unknown"
+                lang_name = "Unknown"
+            else:
+                lang = lid["language"]
+                lang_name = lid["language_name"]
+
+            sequence.append({
+                "start": seg["start"],
+                "end": seg["end"],
+                "text": text,
+                "language": lang,
+                "language_name": lang_name
+            })
+
+        # detect switching
+        for i in range(1, len(sequence)):
+            if sequence[i]["language"] != sequence[i - 1]["language"]:
+                switch_points.append(i)
+
+        full_text = " ".join([s["text"] for s in sequence])
 
         return {
-            "transcription": transcription,
-            "language": lid_result["language"],
-            "language_name": lid_result["language_name"]
+            "transcription": full_text,
+            "code_switch_detected": len(switch_points) > 0,
+            "switch_points": switch_points,
+            "sequence": sequence
         }
 
     except Exception as e:
         return {"error": str(e)}
-
-
+    
+    
 @app.post("/dialog/respond")
 async def dialog_respond(request: Request):
     try:
