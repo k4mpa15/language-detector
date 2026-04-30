@@ -1,11 +1,18 @@
 from fastapi import FastAPI, Request, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 from app.service import LANGUAGE_MAP, detect_language, detect_code_switching
 from app.asr_service import transcribe_audio_with_segments
 import os
 import tempfile
 
 app = FastAPI()
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/health")
 def health():

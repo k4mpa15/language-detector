@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>LID Dialog System UI</title>
+
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #526070;
+      --primary: #064f9e;
+      --primary-dark: #033b78;
+      --border: #c8d2df;
+      --error: #8a1f11;
+      --success: #0f5132;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 24px;
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+      font-size: 1.8rem;
+    }
+
+    header p {
+      margin: 0;
+      max-width: 900px;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 24px auto;
+      padding: 0 16px 32px;
+    }
+
+    section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.3rem;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 1rem;
+      background: white;
+      color: var(--text);
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    button {
+      margin-top: 12px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      background: var(--primary);
+      color: white;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: var(--primary-dark);
+    }
+
+    button:focus,
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: 3px solid #ffbf47;
+      outline-offset: 2px;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin: 4px 0 10px;
+    }
+
+    .result {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 6px;
+      background: #eef3f8;
+      border: 1px solid var(--border);
+      overflow-x: auto;
+      white-space: pre-wrap;
+      min-height: 48px;
+    }
+
+    .error {
+      border-color: var(--error);
+      color: var(--error);
+      background: #fff1f0;
+    }
+
+    .status {
+      margin-bottom: 16px;
+      padding: 12px;
+      border-radius: 6px;
+      background: #eef3f8;
+      border: 1px solid var(--border);
+    }
+
+    .skip-link {
+      position: absolute;
+      left: -999px;
+      top: 8px;
+      background: white;
+      color: var(--primary);
+      padding: 8px;
+      z-index: 1000;
+    }
+
+    .skip-link:focus {
+      left: 8px;
+    }
+
+    @media (max-width: 600px) {
+      header {
+        padding: 18px;
+      }
+
+      header h1 {
+        font-size: 1.5rem;
+      }
+
+      section {
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header>
+    <h1>LID Dialog System</h1>
+    <p>
+      User interface for language detection, dialog response, code-switching detection
+      and voice input analysis.
+    </p>
+  </header>
+
+  <main id="main-content">
+    <div class="status" id="apiStatus" role="status" aria-live="polite">
+      API status: not checked yet.
+    </div>
+
+    <section aria-labelledby="health-heading">
+      <h2 id="health-heading">System status</h2>
+      <p class="hint">Check if the backend API is running.</p>
+      <button type="button" onclick="checkHealth()">Check health</button>
+      <div id="healthResult" class="result" aria-live="polite"></div>
+    </section>
+
+    <section aria-labelledby="languages-heading">
+      <h2 id="languages-heading">Supported languages</h2>
+      <p class="hint">Display the list of languages supported by the system.</p>
+      <button type="button" onclick="getSupportedLanguages()">Load supported languages</button>
+      <div id="languagesResult" class="result" aria-live="polite"></div>
+    </section>
+
+    <section aria-labelledby="text-heading">
+      <h2 id="text-heading">Detect language from text</h2>
+
+      <label for="textInput">Text input</label>
+      <p class="hint">Enter text in any supported language.</p>
+      <textarea id="textInput" placeholder="Example: Hallo, wie geht es dir?"></textarea>
+
+      <button type="button" onclick="detectTextLanguage()">Detect language</button>
+      <div id="textResult" class="result" aria-live="polite"></div>
+    </section>
+
+    <section aria-labelledby="dialog-heading">
+      <h2 id="dialog-heading">Dialog response</h2>
+
+      <label for="dialogInput">User message</label>
+      <p class="hint">The system detects the language and returns a simple response.</p>
+      <textarea id="dialogInput" placeholder="Example: Cześć, jak się masz?"></textarea>
+
+      <button type="button" onclick="getDialogResponse()">Generate response</button>
+      <div id="dialogResult" class="result" aria-live="polite"></div>
+    </section>
+
+    <section aria-labelledby="codeswitch-heading">
+      <h2 id="codeswitch-heading">Code-switching detection</h2>
+
+      <label for="codeSwitchInput">Utterances</label>
+      <p class="hint">Enter one utterance per line.</p>
+      <textarea id="codeSwitchInput" placeholder="Cześć, jak się masz?&#10;I am fine, thank you.&#10;Super, to dobrze."></textarea>
+
+      <button type="button" onclick="detectCodeSwitching()">Detect code-switching</button>
+      <div id="codeSwitchResult" class="result" aria-live="polite"></div>
+    </section>
+
+    <section aria-labelledby="voice-heading">
+      <h2 id="voice-heading">Detect language from voice</h2>
+
+      <label for="voiceInput">Audio file</label>
+      <p class="hint">Upload an audio file, for example WAV or MP3.</p>
+      <input id="voiceInput" type="file" accept="audio/*" />
+
+      <button type="button" onclick="detectVoiceLanguage()">Analyze audio</button>
+      <div id="voiceResult" class="result" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script>
+    const BASE_URL = "http://127.0.0.1:8000";
+
+    function showResult(elementId, data, isError = false) {
+      const element = document.getElementById(elementId);
+      element.textContent = JSON.stringify(data, null, 2);
+
+      if (isError) {
+        element.classList.add("error");
+      } else {
+        element.classList.remove("error");
+      }
+    }
+
+    function showError(elementId, message) {
+      showResult(elementId, { error: message }, true);
+    }
+
+    async function requestJson(url, options = {}) {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      return data;
+    }
+
+    async function checkHealth() {
+      try {
+        const data = await requestJson(`${BASE_URL}/health`);
+        showResult("healthResult", data);
+        document.getElementById("apiStatus").textContent = "API status: running.";
+      } catch (error) {
+        showError("healthResult", "Cannot connect to API. Make sure FastAPI is running.");
+        document.getElementById("apiStatus").textContent = "API status: unavailable.";
+      }
+    }
+
+    async function getSupportedLanguages() {
+      try {
+        const data = await requestJson(`${BASE_URL}/supported-languages`);
+        showResult("languagesResult", data);
+      } catch (error) {
+        showError("languagesResult", "Could not load supported languages.");
+      }
+    }
+
+    async function detectTextLanguage() {
+      const text = document.getElementById("textInput").value.trim();
+
+      if (!text) {
+        showError("textResult", "Text input is required.");
+        return;
+      }
+
+      try {
+        const data = await requestJson(`${BASE_URL}/detect-language/text`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ text })
+        });
+
+        showResult("textResult", data, Boolean(data.error));
+      } catch (error) {
+        showError("textResult", "Request failed.");
+      }
+    }
+
+    async function getDialogResponse() {
+      const text = document.getElementById("dialogInput").value.trim();
+
+      if (!text) {
+        showError("dialogResult", "User message is required.");
+        return;
+      }
+
+      try {
+        const data = await requestJson(`${BASE_URL}/dialog/respond`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ text })
+        });
+
+        showResult("dialogResult", data, Boolean(data.error));
+      } catch (error) {
+        showError("dialogResult", "Request failed.");
+      }
+    }
+
+    async function detectCodeSwitching() {
+      const input = document.getElementById("codeSwitchInput").value.trim();
+
+      if (!input) {
+        showError("codeSwitchResult", "At least one utterance is required.");
+        return;
+      }
+
+      const utterances = input
+        .split("\n")
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+
+      try {
+        const data = await requestJson(`${BASE_URL}/detect-code-switching`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ utterances })
+        });
+
+        showResult("codeSwitchResult", data, Boolean(data.error));
+      } catch (error) {
+        showError("codeSwitchResult", "Request failed.");
+      }
+    }
+
+    async function detectVoiceLanguage() {
+      const fileInput = document.getElementById("voiceInput");
+      const file = fileInput.files[0];
+
+      if (!file) {
+        showError("voiceResult", "Audio file is required.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const response = await fetch(`${BASE_URL}/detect-language/voice`, {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await response.json();
+        showResult("voiceResult", data, Boolean(data.error));
+      } catch (error) {
+        showError("voiceResult", "Audio analysis failed.");
+      }
+    }
+  </script>
+</body>
+</html>

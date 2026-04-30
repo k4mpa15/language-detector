@@ -14,7 +14,7 @@ The project detects the language of user input, handles basic dialog responses, 
 - List of supported languages
 - Basic system health check
 - Voice input support (ASR + LID + code-switching)
-- (Planned) UI for interaction
+- UI for interaction
 
 ---
 
@@ -23,6 +23,10 @@ The project detects the language of user input, handles basic dialog responses, 
 - Python 3
 - FastAPI
 - langdetect
+- faster-whisper
+- HTML / JavaScript
+- pytest
+- requests
 
 ---
 
@@ -36,7 +40,24 @@ uvicorn app.main:app --reload
 Open in browser 
 [API docs](http://127.0.0.1:8000/docs)
 
+To access the UI:
+```bash
+open ui/index.html
+```
+
 ---
+
+## Running Tests
+
+### Unit Tests
+```bash
+python -m pytest
+```
+
+### Other Tests
+```bash
+python tests/test_requests.py
+```
 
 ## API Endpoints
 - GET /health
