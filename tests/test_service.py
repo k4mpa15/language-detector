@@ -1,59 +1,67 @@
-from app.service import detect_language, detect_code_switching, LANGUAGE_MAP
+import pytest
+
+from app.service import detect_code_switching, detect_language, LANGUAGE_MAP
+
+
+def assert_language_result(result, expected_language, expected_name):
+    assert result["language"] == expected_language
+    assert result["language_name"] == expected_name
+    assert isinstance(result["confidence"], float)
+
+
+def assert_code_switching_result(result, expected_switch, utterance_count):
+    assert result["code_switch_detected"] is expected_switch
+    assert isinstance(result["switch_points"], list)
+    assert isinstance(result["sequence"], list)
+    assert len(result["sequence"]) == utterance_count
+    if expected_switch:
+        assert len(result["switch_points"]) >= 1
+    else:
+        assert result["switch_points"] == []
+
+
+@pytest.mark.parametrize(
+    "text,expected_language,expected_name",
+    [
+        (
+            "Hello, how are you today? Please let me know how are you feeling",
+            "en",
+            "English",
+        ),
+        ("Cześć, jak się dzisiaj masz?", "pl", "Polish"),
+        ("Hallo, wie geht es dir heute?", "de", "German"),
+    ],
+)
+def test_detect_language(text, expected_language, expected_name):
+    result = detect_language(text)
+    assert_language_result(result, expected_language, expected_name)
 
 
 def test_language_map_contains_required_languages():
-    assert "en" in LANGUAGE_MAP
-    assert "pl" in LANGUAGE_MAP
-    assert "de" in LANGUAGE_MAP
+    assert set(["en", "pl", "de"]).issubset(LANGUAGE_MAP)
 
 
-def test_detect_language_english():
-    result = detect_language("Hello, how are you today?")
-
-    assert "language" in result
-    assert "language_name" in result
-    assert "confidence" in result
-    assert result["language"] == "en"
-
-
-def test_detect_language_polish():
-    result = detect_language("Cześć, jak się dzisiaj masz?")
-
-    assert "language" in result
-    assert "language_name" in result
-    assert "confidence" in result
-    assert result["language"] == "pl"
-
-
-def test_detect_language_german():
-    result = detect_language("Hallo, wie geht es dir heute?")
-
-    assert "language" in result
-    assert "language_name" in result
-    assert "confidence" in result
-    assert result["language"] == "de"
-
-
-def test_detect_code_switching_detects_change():
-    result = detect_code_switching([
-        "Cześć, jak się masz?",
-        "I am fine, thank you.",
-        "Super, to dobrze."
-    ])
-
-    assert result["code_switch_detected"] is True
-    assert "switch_points" in result
-    assert len(result["switch_points"]) >= 1
-    assert len(result["sequence"]) == 3
-
-
-def test_detect_code_switching_no_change():
-    result = detect_code_switching([
-        "Hello, how are you?",
-        "I am fine, thank you.",
-        "This is a test."
-    ])
-
-    assert result["code_switch_detected"] is False
-    assert result["switch_points"] == []
-    assert len(result["sequence"]) == 3
+@pytest.mark.parametrize(
+    "utterances,expected_switch",
+    [
+        (
+            [
+                "Cześć, jak się masz?",
+                "I am fine, thank you.",
+                "Super, to dobrze.",
+            ],
+            True,
+        ),
+        (
+            [
+                "Hello, how are you?",
+                "I am fine, thank you.",
+                "This is a test.",
+            ],
+            False,
+        ),
+    ],
+)
+def test_detect_code_switching(utterances, expected_switch):
+    result = detect_code_switching(utterances)
+    assert_code_switching_result(result, expected_switch, len(utterances))

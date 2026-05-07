@@ -54,6 +54,16 @@ open ui/index.html
 python -m pytest
 ```
 
+### Coverage Report
+```bash
+python -m pytest --cov=app
+```
+
+### Coverage Report with HTML Output
+```bash
+python -m pytest --cov=app --cov-report=html
+```
+
 ### Other Tests
 ```bash
 python tests/test_requests.py

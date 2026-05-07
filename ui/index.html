@@ -126,8 +126,51 @@
       background: #eef3f8;
       border: 1px solid var(--border);
       overflow-x: auto;
-      white-space: pre-wrap;
       min-height: 48px;
+    }
+
+    .result-list,
+    .result-table {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      font-size: 0.98rem;
+    }
+
+    .result-list li {
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .result-list li:last-child {
+      border-bottom: none;
+    }
+
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+
+    .result-table th,
+    .result-table td {
+      text-align: left;
+      padding: 8px 10px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .result-table th {
+      background: #dce7f5;
+      font-weight: 700;
+    }
+
+    .result p {
+      margin: 0.5rem 0;
+    }
+
+    .result-error {
+      color: var(--error);
+      font-weight: 700;
     }
 
     .error {
@@ -252,9 +295,130 @@
   <script>
     const BASE_URL = "http://127.0.0.1:8000";
 
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function formatLanguageResult(data) {
+      if (data.error) {
+        return `<p class="result-error">${escapeHtml(data.error)}</p>`;
+      }
+
+      if (data.supported_languages) {
+        return `<ul class="result-list">${data.supported_languages
+          .map(
+            (language) =>
+              `<li><strong>${escapeHtml(language.code)}</strong> — ${escapeHtml(
+                language.name
+              )}</li>`
+          )
+          .join("")}</ul>`;
+      }
+
+      if (data.status) {
+        return `<p><strong>Status:</strong> ${escapeHtml(data.status)}</p>`;
+      }
+
+      if (data.response_text) {
+        return `
+          <p><strong>Detected language:</strong> ${escapeHtml(
+            data.language_name
+          )} (${escapeHtml(data.language)})</p>
+          <p><strong>Response:</strong> ${escapeHtml(data.response_text)}</p>
+        `;
+      }
+
+      if (data.transcription) {
+        const summary = `
+          <p><strong>Transcription:</strong> ${escapeHtml(data.transcription)}</p>
+          <p><strong>Detected language:</strong> ${escapeHtml(
+            data.language_name
+          )} (${escapeHtml(data.language)})</p>
+          <p><strong>Confidence:</strong> ${escapeHtml(data.confidence)}</p>
+          <p><strong>Code switch detected:</strong> ${
+            data.code_switch_detected ? "Yes" : "No"
+          }</p>
+        `;
+
+        const rows = data.sequence
+          .map(
+            (segment, index) =>
+              `<tr>
+                <td>${index + 1}</td>
+                <td>${escapeHtml(segment.text)}</td>
+                <td>${escapeHtml(segment.language_name)}</td>
+                <td>${escapeHtml(segment.confidence ?? "-")}</td>
+              </tr>`
+          )
+          .join("");
+
+        return `${summary}
+          <table class="result-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Segment text</th>
+                <th>Language</th>
+                <th>Confidence</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+      }
+
+      if (data.sequence) {
+        const rows = data.sequence
+          .map(
+            (item, index) =>
+              `<tr>
+                <td>${index + 1}</td>
+                <td>${escapeHtml(item.text)}</td>
+                <td>${escapeHtml(item.language_name)}</td>
+                <td>${escapeHtml(item.confidence ?? "-")}</td>
+              </tr>`
+          )
+          .join("");
+
+        return `
+          <p><strong>Code switch detected:</strong> ${
+            data.code_switch_detected ? "Yes" : "No"
+          }</p>
+          <p><strong>Switch points:</strong> ${escapeHtml(
+            data.switch_points.join(", ") || "none"
+          )}</p>
+          <table class="result-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Utterance</th>
+                <th>Language</th>
+                <th>Confidence</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+      }
+
+      if (data.language_name) {
+        return `
+          <p><strong>Detected language:</strong> ${escapeHtml(
+            data.language_name
+          )} (${escapeHtml(data.language)})</p>
+          <p><strong>Confidence:</strong> ${escapeHtml(data.confidence)}</p>
+        `;
+      }
+
+      return `<pre>${escapeHtml(JSON.stringify(data, null, 2))}</pre>`;
+    }
+
     function showResult(elementId, data, isError = false) {
       const element = document.getElementById(elementId);
-      element.textContent = JSON.stringify(data, null, 2);
+      element.innerHTML = formatLanguageResult(data);
 
       if (isError) {
         element.classList.add("error");
@@ -264,7 +428,9 @@
     }
 
     function showError(elementId, message) {
-      showResult(elementId, { error: message }, true);
+      const element = document.getElementById(elementId);
+      element.innerHTML = `<p class="result-error">${escapeHtml(message)}</p>`;
+      element.classList.add("error");
     }
 
     async function requestJson(url, options = {}) {
