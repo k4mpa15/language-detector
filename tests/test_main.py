@@ -107,7 +107,9 @@ def test_detect_language_voice_endpoint_with_mock(monkeypatch):
             return {"language": "pl", "language_name": "Polish", "confidence": 0.98}
         return {"language": "en", "language_name": "English", "confidence": 0.99}
 
-    monkeypatch.setattr("app.main.transcribe_audio_with_segments", fake_transcribe_audio_with_segments)
+    monkeypatch.setattr(
+        "app.main.transcribe_audio_with_segments", fake_transcribe_audio_with_segments
+    )
     monkeypatch.setattr("app.main.detect_language", fake_detect_language)
 
     response = client.post(

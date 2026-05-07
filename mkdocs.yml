@@ -1,0 +1,58 @@
+site_name: Language Detection Dialog System
+site_description: Dokumentacja systemu detekcji języka w wielojęzycznym dialogu
+site_author: Your Name
+site_url: https://example.com
+
+theme:
+  name: material
+  language: pl
+  palette:
+    - scheme: default
+      primary: blue
+      accent: light blue
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Przełącz na tryb ciemny
+    - scheme: slate
+      primary: blue
+      accent: light blue
+      toggle:
+        icon: material/toggle-switch-outline
+        name: Przełącz na tryb jasny
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+
+plugins:
+  - search
+  - awesome-pages
+
+markdown_extensions:
+  - pymdownx.highlight:
+      use_pygments: true
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      baselevel: 2
+
+nav:
+  - Główna: index.md
+  - Getting Started: getting-started.md
+  - API Reference: api.md
+  - Funkcje: features.md
+  - Development: development.md
+  - Deployment: deployment.md
