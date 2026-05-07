@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - .:/usr/src/app:delegated
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    restart: unless-stopped
