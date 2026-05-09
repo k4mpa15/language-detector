@@ -15,6 +15,20 @@ LANGUAGE_MAP = {
     "pl": "Polish",
 }
 
+# Responses for each language
+LANGUAGE_RESPONSES = {
+    "pl": "Wykryłam język polski. Mogę kontynuować rozmowę po polsku. 🇵🇱",
+    "en": "I detected English. I can continue the conversation in English. 🇬🇧",
+    "de": "Ich habe Deutsch erkannt. Ich kann das Gespräch auf Deutsch fortsetzen. 🇩🇪",
+    "es": "Detecté español. Puedo continuar la conversación en español. 🇪🇸",
+    "fr": "J'ai détecté le français. Je peux continuer la conversation en français. 🇫🇷",
+    "pt": "Detectei português. Posso continuar a conversa em português. 🇧🇷",
+    "ru": "Я обнаружил русский язык. Я могу продолжить разговор на русском. 🇷🇺",
+    "ar": "لقد اكتشفت العربية. يمكنني متابعة المحادثة بالعربية. 🇸🇦",
+    "hi": "मैंने हिंदी का पता लगाया। मैं हिंदी में बातचीत जारी रख सकता हूँ। 🇮🇳",
+    "zh-cn": "我检测到了中文。我可以继续用中文交谈。 🇨🇳",
+}
+
 
 def detect_language(text):
     try:
